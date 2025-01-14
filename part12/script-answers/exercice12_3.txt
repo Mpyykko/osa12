@@ -1,0 +1,9 @@
+docker container run -it ubuntu bash
+root@051267343c1e:/# apt-get update
+root@051267343c1e:/#  apt-get -y install nano
+Ctrl O
+Ctrl X
+nano /usr/src/app/index.js
+console.log('Hello World');
+Ctrl O
+Ctrl X

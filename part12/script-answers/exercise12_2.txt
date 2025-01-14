@@ -1,0 +1,10 @@
+PS C:\Users\pyykk\Desktop\osa12> docker container run -it ubuntu bash
+Unable to find image 'ubuntu:latest' locally
+latest: Pulling from library/ubuntu
+de44b265507a: Download complete
+Digest: sha256:80dd3c3b9c6cecb9f1667e9290b3bc61b78c2678c02cbdae5f0fea92cc6734ab
+Status: Downloaded newer image for ubuntu:latest
+root@49fdd14107f7:/# mkdir -p /usr/src/app
+root@49fdd14107f7:/# echo /usr/src/app/index.js
+/usr/src/app/index.js
+root@49fdd14107f7:/# exit

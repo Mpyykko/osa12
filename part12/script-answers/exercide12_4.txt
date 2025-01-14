@@ -1,0 +1,6 @@
+apt update
+apt install -y nodejs
+root@051267343c1e:/# node -v
+v18.19.1
+root@051267343c1e:/# node /usr/src/app/index.js
+Hello World
