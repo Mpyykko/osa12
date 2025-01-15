@@ -1,6 +1,7 @@
 const express = require('express');
-const { Todo } = require('../mongo')
+const { Todo } = require('../mongo');
 const router = express.Router();
+const redis = require('../redis');
 
 /* GET todos listing. */
 router.get('/', async (_, res) => {
@@ -10,11 +11,31 @@ router.get('/', async (_, res) => {
 
 /* POST todo to listing. */
 router.post('/', async (req, res) => {
-  const todo = await Todo.create({
-    text: req.body.text,
-    done: false
-  })
-  res.send(todo);
+  const updateTodoCounter = async () => {
+    try {
+      const count = await getAsync('count');
+      if (count) {
+        await setAsync('count', parseInt(count) + 1);
+      } else {
+        await setAsync('count', 1);
+      }
+    } catch (error) {
+      console.error('Error updating Redis counter:', error);
+    }
+  };
+
+  await updateTodoCounter();
+
+  try {
+    const todo = await Todo.create({
+      text: req.body.text,
+      done: false,
+    });
+    res.send(todo);
+  } catch (error) {
+    console.error('Error creating TODO:', error);
+    res.status(500).send({ error: 'Failed to create TODO' });
+  }
 });
 
 const singleRouter = express.Router();
@@ -35,12 +56,18 @@ singleRouter.delete('/', async (req, res) => {
 
 /* GET todo. */
 singleRouter.get('/', async (req, res) => {
-  res.sendStatus(405); // Implement this
+  res.send(req.todo);
 });
 
 /* PUT todo. */
 singleRouter.put('/', async (req, res) => {
-  res.sendStatus(405); // Implement this
+  const { text, done } = req.body
+
+  if (text) req.todo.text = text
+  if (done !== undefined) req.todo.done = done
+
+  await req.todo.save()
+  res.send(req.todo)
 });
 
 router.use('/:id', findByIdMiddleware, singleRouter)

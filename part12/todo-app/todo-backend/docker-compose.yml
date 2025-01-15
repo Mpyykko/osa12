@@ -1,16 +1,36 @@
-version: '3'
 services:
-  app:
-    image: todo-backend
-    build: .
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - 3000:3000
+      - "3000:3000"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/tododb
+      - MONGO_URL=${MONGO_URL}
+      - REDIS_URL=${REDIS_URL}
     depends_on:
       - mongo
+      - redis
+    volumes:
+      - .:/usr/src/app
+    command: npm start
 
   mongo:
-    image: mongo:latest
+    image: mongo:6
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
     ports:
-      - 27017:27017
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:6
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  mongo_data:
