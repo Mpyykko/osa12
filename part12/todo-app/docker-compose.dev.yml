@@ -1,0 +1,60 @@
+services:
+  todo-front:
+    build:
+      context: ./todo-frontend
+      dockerfile: dev.Dockerfile
+    ports:
+      - "5173:5173"
+    container_name: todo-front
+    volumes:
+      - ./todo-frontend:/app
+    command: npm run dev
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:1.20.1
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.dev.conf:ro
+    ports:
+      - 8080:80
+    container_name: reverse-proxy
+    depends_on:
+      - todo-front
+
+  backend:
+    build:
+      context: ./todo-backend
+      dockerfile: dev.Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URL=${MONGO_URL}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./todo-backend:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm start
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:6
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  mongo_data:
